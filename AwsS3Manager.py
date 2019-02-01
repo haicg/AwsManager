@@ -20,7 +20,7 @@ import sys
 
 import boto3
 
-configFile = 'default.cfg'
+configFile = 's3.cfg'
 
 
 def check_env():
@@ -32,8 +32,7 @@ def check_env():
         print('~/.aws/credentials not exist')
 
 
-def load_parms(section_name='aws'):
-    parms = {}
+def load_parms(parms, section_name='aws'):
     cf = configparser.ConfigParser()
     cf.read(configFile)
     if section_name in cf.sections():
@@ -87,8 +86,9 @@ def help():
 def get_opts(parms):
     argv = sys.argv[1:]
     success = False
+
     try:
-        opts, args = getopt.getopt(argv, "hu:", ['--upfile'])
+        opts, args = getopt.getopt(argv, "hu:c:", ['--upfile'])
     except getopt.GetoptError:
         help()
         sys.exit(2)
@@ -100,6 +100,9 @@ def get_opts(parms):
         elif opt in ("-u", "--upfile"):
             parms['upfile'] = arg
             success = True
+        elif opt in ("-c", "--config"):
+            parms['config'] = arg
+            configFile = arg
     if success:
         return parms
     else:
@@ -110,7 +113,10 @@ def get_opts(parms):
 if __name__ == '__main__':
     if not check_env():
         sys.exit(-1)
-    parms = load_parms('aws')
+
+    parms = {}
     parms = get_opts(parms)
+    parms = load_parms(parms, 'aws')
+
     print(parms)
-    upload_file(parms)
+    # upload_file(parms)
